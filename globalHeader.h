@@ -32,6 +32,7 @@
 
 
 class viewELLayoutEditHandler;
+class viewBLBatchPanelHandler;
 class viewVZLayoutEditHandler;
 class connection;
 class csv_connection;
@@ -51,6 +52,7 @@ class valueListDialog;
 class BRAHMS_dialog;
 class genericInput;
 class experiment;
+class batchJob;
 class RootComponentItem;
 class synapse;
 class systemmodel;

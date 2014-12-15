@@ -64,7 +64,9 @@ SOURCES += main.cpp \
     projectobject.cpp \
     filteroutundoredoevents.cpp \
     batchexperimentwindow.cpp \
-    vectorlistmodel.cpp
+    vectorlistmodel.cpp \
+    viewblbatchpanelhandler.cpp \
+    batchjob.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -116,7 +118,9 @@ HEADERS  += mainwindow.h \
     filteroutundoredoevents.h \
     batchexperimentwindow.h \
     vectorlistmodel.h \
-    qmessageboxresizable.h
+    qmessageboxresizable.h \
+    viewblbatchpanelhandler.h \
+    batchjob.h
 
 FORMS    += mainwindow.ui \
     ninemlsortingdialog.ui \
@@ -170,8 +174,9 @@ linux-g++-64{
     DEPENDPATH += /usr/lib/graphviz
 }
 macx{
+    QMAKE_MAC_SDK = macosx10.9
     QMAKE_CXXFLAGS += -O0 -g
-    LIBS += -L/opt/local/lib/ -L/opt/local/lib/graphviz/ -lpython
+    LIBS += -L/opt/local/lib/ -L/opt/local/lib/graphviz/ -L/System/Library/Frameworks/Python.framework/2.7/lib -lpython2.7
     INCLUDEPATH += /System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/System/Library/Frameworks/Python.framework/Versions/2.6/include/python2.6
     INCLUDEPATH += /opt/local/include /opt/local/include/graphviz
     DEPENDPATH +=  /opt/local/lib/graphviz

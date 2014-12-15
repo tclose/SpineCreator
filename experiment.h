@@ -110,6 +110,14 @@ struct externalObject {
     int size;
 };
 
+/*!
+ * \brief The exptInput class
+ * A class to represent the SpineML Experiment/ *Input tags.
+ * The class represents all Inputs, with the exptIntype
+ * variable switching between types. The params QVector
+ * holds the configuration data for the input, the
+ * structure of which varies between input types.
+ */
 class exptInput : QObject
 {
     Q_OBJECT
@@ -131,6 +139,7 @@ public:
         externalInput.host = "localhost";
         externalInput.timestep = 0.0;
     }
+    exptInput(exptInput *);
 
     bool rate;
     int currentIndex;
@@ -152,12 +161,30 @@ public:
     void readXML(QXmlStreamReader * , projectObject *);
 };
 
+/*!
+ * \brief The exptOutput class
+ * A class to represent the SpineML Experiment/LogOutput tags.
+ * The class represents all Outputs, with network outputs
+ * slected using the isExternal bool.
+ */
 class exptOutput : QObject {
     Q_OBJECT
 public:
 
-    exptOutput() {edit = true; set=false; isExternal = false; name = "New Output"; portIsAnalog = true; indices="all"; \
-                  externalOutput.size=1; externalOutput.port = 50091; externalOutput.host = "localhost"; externalOutput.timestep = 0.0;}
+    exptOutput() {
+        edit = true;
+        set=false;
+        isExternal = false;
+        name = "New Output";
+        portIsAnalog = true;
+        indices="all";
+        externalOutput.size=1;
+        externalOutput.port = 50091;
+        externalOutput.host = "localhost";
+        externalOutput.timestep = 0.0;
+    }
+
+    exptOutput(exptOutput *);
 
     //exptOutput outType;
     //QVector < float > params;
@@ -177,11 +204,19 @@ public:
 
 };
 
+/*!
+ * \brief The exptLesion class
+ * A class to represent the SpineML Experiment/Lesion tags.
+ * Denotes a Projection that should not be simulated in the
+ * executed model. Holds a shared pointer reference to a projection.
+ */
 class exptLesion : QObject {
     Q_OBJECT
 public:
 
     exptLesion() {edit = true; set=false;}
+
+    exptLesion(exptLesion *);
 
     //exptOutput outType;
     //QVector < float > params;
@@ -196,11 +231,21 @@ public:
 
 };
 
+/*!
+ * \brief The exptChangeProp class
+ * A class to represent the SpineML Experiment/Config/Property tags.
+ * Denotes a change to alter a Property of the model. This means
+ * that th property will be simulated with the configuration from
+ * the experiment. Holds a shared pointer to a component, and an
+ * internal ParameterData for overriding the Property.
+ */
 class exptChangeProp : QObject {
     Q_OBJECT
 public:
 
     exptChangeProp() {edit = true; set=false; par = NULL;}
+
+    exptChangeProp(exptChangeProp *);
 
     ParameterData * par;
     QSharedPointer <NineMLComponentData> component;
@@ -213,7 +258,13 @@ public:
 
 };
 
-
+/*!
+ * \brief The experiment class
+ * Holds a set of Inputs / Outputs / Lesions and ChangeProps
+ * along with simulation data which describe the protocol for
+ * simulating the model. Can be used in Batches to simulate
+ * sets of experiments.
+ */
 class experiment : QObject
 {
     Q_OBJECT
@@ -244,6 +295,7 @@ public:
     void select(QVector < experiment * > *);
     void deselect();
     bool editing;
+    bool saveWithDateStamp;
 
 private:
     exptBox * currBoxPtr;

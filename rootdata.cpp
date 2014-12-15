@@ -31,6 +31,7 @@
 #include "projectobject.h"
 #include "systemmodel.h"
 #include "nineml_rootcomponentitem.h"
+#include "batchjob.h"
 
 /*
  Alex Cope 2012

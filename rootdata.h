@@ -105,6 +105,7 @@ public:
     QVector < QSharedPointer<NineMLLayout> > catalogLayout;
     QVector < QString > catalogConn;
     QVector < experiment *> experiments;
+    QVector < QSharedPointer<batchJob> > batchjobs;
 
     QVector < loadedComponent > loadedComponents;
 

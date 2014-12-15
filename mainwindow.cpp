@@ -61,7 +61,7 @@ MainWindow(QWidget *parent) :
 
     QCoreApplication::setOrganizationName("BLANK");
     QCoreApplication::setOrganizationDomain("BLANK.ac.uk");
-    QCoreApplication::setApplicationName("SpineCreator");
+    QCoreApplication::setApplicationName("SpineCreatorBatchTesting");
 
     // initialise GUI
     ui->setupUi(this);
@@ -254,6 +254,9 @@ MainWindow(QWidget *parent) :
     // check for version control
     configureVCSMenu();
 
+    // BATCH JOB EDITOR initialisation
+    initViewBL();
+
     // EXPERIMENT EDITOR initialisation
     initViewEL();
 
@@ -307,6 +310,8 @@ MainWindow(QWidget *parent) :
     QObject::connect(ui->butSS, SIGNAL(clicked()), &(data), SLOT(addSpikeSource()));
     QObject::connect(ui->butC, SIGNAL(clicked()), &(data), SLOT(deleteCurrentSelection()));
 
+    // connect up the buttons to switch between the tabs on the main UI
+    QObject::connect(ui->tabBatch, SIGNAL(clicked()), this, SLOT(viewBLshow()));
     QObject::connect(ui->tab0, SIGNAL(clicked()), this, SLOT(viewELshow()));
     QObject::connect(ui->tab1, SIGNAL(clicked()), this, SLOT(viewNLshow()));
     QObject::connect(ui->tab2, SIGNAL(clicked()), this, SLOT(viewVZshow()));
@@ -687,6 +692,112 @@ void MainWindow::initViewGV()
 }
 
 void MainWindow::connectViewGV()
+{
+}
+
+void MainWindow::initViewBL()
+{
+    // adding viewEL (experiments) ####################
+
+    // add horizontal layout
+    QFrame * frame = new QFrame;
+    QHBoxLayout * splitter = new QHBoxLayout;
+    frame->setLayout(splitter);
+    viewBL.view = frame;
+
+    // add the splitter to the main layout, spanning 2 rows and set margins
+    ((QGridLayout *) this->ui->centralWidget->layout())->addWidget(frame, 0, ((QGridLayout *) this->ui->centralWidget->layout())->columnCount(),4,1);
+    frame->resize(this->ui->view1->size());
+    frame->setContentsMargins(0,0,0,0);
+    splitter->setContentsMargins(0,0,0,0);
+
+    // hide, since we will default to view 1
+    frame->hide();
+
+    // add the panel
+    QScrollArea *batchSArea = new QScrollArea();
+    batchSArea->setLineWidth(1);
+    batchSArea->setFrameStyle(1);
+
+    QWidget * batchContent = new QWidget(batchSArea);
+    batchSArea->setWidget(batchContent);
+    batchSArea->setWidgetResizable(true);
+
+    batchContent->setLayout(new QHBoxLayout());
+    batchContent->layout()->setSpacing(5);
+
+    splitter->addWidget(batchSArea);
+
+    this->viewBL.expt = batchContent;
+    this->viewBL.propertiesScrollArea = batchSArea;
+
+    // add the view
+    QScrollArea *selection = new QScrollArea();
+    selection->setLineWidth(0);
+    selection->setFrameStyle(1);
+
+    QWidget *selContent0 = new QWidget;
+    selection->setWidget(selContent0);
+    selection->setWidgetResizable(true);
+    selection->setMinimumWidth(300);
+    selection->setMaximumWidth(300);
+
+    selContent0->setLayout(new QVBoxLayout());
+
+    this->viewBL.panel = selContent0;
+
+    ((QVBoxLayout *) selContent0->layout())->addStretch();
+    ((QVBoxLayout *) selContent0->layout())->setContentsMargins(0,0,0,0);
+    ((QVBoxLayout *) selContent0->layout())->setSpacing(0);
+
+    splitter->insertWidget(0,selection);
+
+    // add and set up the toolbar
+    QFrame * toolbar0 = new QFrame(this->ui->toolbar_3);
+    toolbar0->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    toolbar0->setMinimumSize(this->ui->topleft->size());
+    toolbar0->setMinimumHeight(27);
+    toolbar0->setMaximumHeight(27);
+    toolbar0->setStyleSheet(this->toolbarStyleSheet);
+    if (toolbar0->layout())
+        delete toolbar0->layout();
+    toolbar0->setLayout(new QHBoxLayout);
+    toolbar0->layout()->setContentsMargins(0,0,0,0);
+    toolbar0->layout()->setSpacing(0);
+    toolbar0->setLineWidth(0);
+    toolbar0->setFrameStyle(0);
+
+    // add toolbar to the frame
+    ((QVBoxLayout *) selContent0->layout())->insertWidget(0, toolbar0);
+
+    QCommonStyle style;
+
+    // add a run button to the toolbar
+    QToolButton * run = new QToolButton();
+    run->setMinimumHeight(27);
+    run->setStyleSheet("QToolButton { color: white; border: 0px; }");
+    run->setText("Run batch");
+    run->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    run->setToolTip("Run the selected batch in the chosen simulator");
+    run->setIcon(style.standardIcon(QStyle::SP_MediaPlay));
+    toolbar0->layout()->addWidget(run);
+    ((QHBoxLayout *) toolbar0->layout())->addStretch();
+
+    QFrame* line0b = new QFrame();
+    line0b->setMaximumHeight(1);
+    line0b->setFrameShape(QFrame::HLine);
+    line0b->setFrameShadow(QFrame::Plain);
+
+    ((QVBoxLayout *) selContent0->layout())->insertWidget(1,line0b);
+
+    this->viewBLhandler = new viewBLBatchPanelHandler(&(this->viewBL), &(this->data));
+
+    // internal connections
+    connect(run, SIGNAL(clicked()), this->viewBLhandler, SLOT(run()));
+    connect(this->viewBLhandler, SIGNAL(enableRun(bool)), run, SLOT(setEnabled(bool)));
+}
+
+void MainWindow::connectViewBL()
 {
 }
 
@@ -1302,6 +1413,7 @@ void MainWindow::createActions()
     connect(ui->actionRepository_status, SIGNAL(triggered()), this, SLOT(actionRepStatus_triggered()));
     connect(ui->actionRepository_log, SIGNAL(triggered()), this, SLOT(actionRepLog_triggered()));
     connect(ui->actionRe_scan_for_VCS, SIGNAL(triggered()), this, SLOT(actionRescanVCS_triggered()));
+    connect(ui->actionDuplicate_experiment, SIGNAL(triggered()), this, SLOT(actionDuplicate_experiment_triggered()));
 
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 }
@@ -1911,6 +2023,7 @@ void MainWindow::saveImageAction()
 void MainWindow::viewGVshow()
 {
     // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
@@ -1929,6 +2042,7 @@ void MainWindow::viewGVshow()
     // hide the other views
     this->ui->view1->hide();
     this->viewEL.view->hide();
+    this->viewBL.view->hide();
     if (this->viewVZ.OpenGLWidget != NULL) {
         this->viewVZ.view->hide();
         // save the tree state
@@ -1947,9 +2061,66 @@ void MainWindow::viewGVshow()
     QApplication::processEvents( QEventLoop::ExcludeUserInputEvents );
 }
 
+void MainWindow::viewBLshow()
+{
+    // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+    this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+    this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+    this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+    this->ui->tab3->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+    this->ui->tab4->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
+
+    // make sure open component is replaced in the network
+    if (viewCL.root != NULL) {
+        viewCL.root->alPtr->updateFrom(viewCL.root->al);
+        data.replaceComponent(viewCL.root->alPtr, viewCL.root->alPtr);
+    }
+
+    // set the current view button to the 'active' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:rgba(255,255,255,40%); }");
+
+    // refresh it all
+    //this->viewBLhandler->redraw();
+
+    // hide the other views
+    this->viewGV.subWin->hide();
+    this->viewEL.view->hide();
+    this->ui->view1->hide();
+    if (this->viewVZ.OpenGLWidget != NULL) {
+        this->viewVZ.view->hide();
+        // save the tree state
+        viewVZhandler->saveTreeState();
+    }
+    this->viewCL.frame->hide();
+    if (viewCL.root != NULL) {
+        this->viewCL.root->toolbar->hide();
+        this->viewCL.root->addItemsToolbar->hide();
+    }
+    this->viewCL.dock->hide();
+
+    // menus
+    ui->menuBar->clear();
+    ui->menuBar->addMenu(ui->menuFile);
+    ui->menuBar->addMenu(ui->menuEdit);
+    ui->menuBar->addMenu(ui->menuProject);
+    ui->menuBar->addMenu(ui->menuBatch);
+    ui->menuBar->addMenu(ui->menuModel); // actually version control
+    ui->menuBar->addMenu(ui->menuHelp);
+
+    // show current view
+    this->viewBL.view->show();
+
+    // titlebar
+    updateTitle();
+
+    QApplication::processEvents( QEventLoop::ExcludeUserInputEvents );
+}
+
 void MainWindow::viewELshow()
 {
     // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
@@ -1970,6 +2141,7 @@ void MainWindow::viewELshow()
 
     // hide the other views
     this->viewGV.subWin->hide();
+    this->viewBL.view->hide();
     this->ui->view1->hide();
     if (this->viewVZ.OpenGLWidget != NULL) {
         this->viewVZ.view->hide();
@@ -2004,6 +2176,7 @@ void MainWindow::viewELshow()
 void MainWindow::viewNLshow()
 {
     // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
@@ -2025,6 +2198,7 @@ void MainWindow::viewNLshow()
     // hide the other views
     this->viewGV.subWin->hide();
     this->viewEL.view->hide();
+    this->viewBL.view->hide();
     if (this->viewVZ.OpenGLWidget != NULL) {
         this->viewVZ.view->hide();
         // save the tree state
@@ -2074,6 +2248,7 @@ void MainWindow::viewVZshow()
     viewVZ.OpenGLWidget->refreshAll();
 
     // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
@@ -2093,6 +2268,7 @@ void MainWindow::viewVZshow()
     this->viewGV.subWin->hide();
     this->ui->view1->hide();
     this->viewEL.view->hide();
+    this->viewBL.view->hide();
     this->viewCL.frame->hide();
     if (viewCL.root != NULL) {
         this->viewCL.root->toolbar->hide();
@@ -2154,6 +2330,7 @@ void MainWindow::viewVZshow()
 void MainWindow::viewCLshow()
 {
     // reset all view buttons to 'inactive' look
+    this->ui->tabBatch->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab0->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab1->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
     this->ui->tab2->setStyleSheet("QToolButton { border: 0px; color:white; background:QColor(0,0,0,0); }");
@@ -2168,6 +2345,7 @@ void MainWindow::viewCLshow()
 
     // hide the other views
     this->viewGV.subWin->hide();
+    this->viewBL.view->hide();
     this->ui->view1->hide();
     this->viewEL.view->hide();
     if (this->viewVZ.OpenGLWidget != NULL) {
@@ -2735,6 +2913,23 @@ void MainWindow::actionRescanVCS_triggered()
 {
     data.currProject->version.detectVCSes();
     configureVCSMenu();
+}
+
+void MainWindow::actionDuplicate_experiment_triggered()
+{
+        // find the selected experiment
+    for (int i = 0; i < this->data.experiments.size(); ++i)
+    {
+        if (this->data.experiments[i]->selected) {
+            this->data.experiments.push_back(new experiment(this->data.experiments[i]));
+            // select new experiment
+            this->data.experiments.back()->select(&this->data.experiments);
+            if (this->viewELhandler) {
+                this->viewELhandler->redraw();
+            }
+            return;
+        }
+    }
 }
 
 void MainWindow::about()

@@ -40,7 +40,16 @@
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -92,7 +101,16 @@
        <number>0</number>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <property name="spacing">
@@ -396,8 +414,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>433</width>
-            <height>576</height>
+            <width>432</width>
+            <height>577</height>
            </rect>
           </property>
          </widget>
@@ -477,7 +495,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>140</y>
+         <y>180</y>
          <width>50</width>
          <height>41</height>
         </rect>
@@ -569,7 +587,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>185</y>
+         <y>225</y>
          <width>50</width>
          <height>41</height>
         </rect>
@@ -615,7 +633,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>95</y>
+         <y>135</y>
          <width>50</width>
          <height>41</height>
         </rect>
@@ -735,6 +753,52 @@
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
+      <widget class="QToolButton" name="tabBatch">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>90</y>
+         <width>50</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>6</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="statusTip">
+        <string>Experiments for this model</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: 0px; color:white</string>
+       </property>
+       <property name="text">
+        <string>Batch run</string>
+       </property>
+       <property name="icon">
+        <iconset resource="icons.qrc">
+         <normaloff>:/icons/toolbar/images/acptShad.png</normaloff>:/icons/toolbar/images/acptShad.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>26</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextUnderIcon</enum>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -828,15 +892,22 @@
      <string>E&amp;xperiment</string>
     </property>
     <addaction name="actionRun_experiment"/>
+    <addaction name="actionDuplicate_experiment"/>
    </widget>
    <widget class="QMenu" name="menuProject">
     <property name="title">
      <string>&amp;Project</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuBatch">
+    <property name="title">
+     <string>Batch</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuProject"/>
+   <addaction name="menuBatch"/>
    <addaction name="menuExperiment"/>
    <addaction name="menuNeuron"/>
    <addaction name="menuModel"/>
@@ -1059,6 +1130,11 @@
   <action name="actionClear_list">
    <property name="text">
     <string>Clear list</string>
+   </property>
+  </action>
+  <action name="actionDuplicate_experiment">
+   <property name="text">
+    <string>Duplicate experiment</string>
    </property>
   </action>
  </widget>

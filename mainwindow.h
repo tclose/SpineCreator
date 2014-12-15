@@ -34,6 +34,7 @@
 #include "rootlayout.h"
 #include "layoutaliaseditdialog.h"
 #include "layouteditpreviewdialog.h"
+#include "viewblbatchpanelhandler.h"
 #include "viewELexptpanelhandler.h"
 #include "viewVZlayoutedithandler.h"
 #include "viewGVpropertieslayout.h"
@@ -65,6 +66,14 @@ struct viewGVstruct {
 };
 
 struct viewELstruct {
+    QFrame * view;
+    QWidget * selectionPanel;
+    QWidget * panel;
+    QWidget * expt;
+    QScrollArea * propertiesScrollArea;
+};
+
+struct viewBLstruct {
     QFrame * view;
     QWidget * selectionPanel;
     QWidget * panel;
@@ -118,10 +127,12 @@ public:
     rootData data;
     QUndoGroup * undoStacks;
     viewGVstruct viewGV;
+    viewBLstruct viewBL;
     viewELstruct viewEL;
     viewNLstruct viewNL;
     viewVZstruct viewVZ;
     viewCLstruct viewCL;
+    viewBLBatchPanelHandler * viewBLhandler;
     viewELExptPanelHandler * viewELhandler;
     viewVZLayoutEditHandler * viewVZhandler;
     QShortcut * deleteShortcut;
@@ -145,6 +156,8 @@ private:
     QAction *undoAction;
     QAction *redoAction;
     QDomDocument tempDoc;
+    void initViewBL();
+    void connectViewBL();
     void initViewEL();
     void connectViewEL();
     void initViewGV();
@@ -176,6 +189,7 @@ public slots:
     void import_csv();
     void viewGVshow();
     void viewELshow();
+    void viewBLshow();
     void viewNLshow();
     void viewVZshow();
     void viewCLshow();
@@ -216,6 +230,7 @@ public slots:
     void actionAddOnEvent_triggered();
     void actionAddOnImpulse_triggered();
     void about();
+    void actionDuplicate_experiment_triggered();
 
     // versioning
     void actionCommitModel_triggered();
